@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 import random
@@ -19,6 +19,7 @@ app.add_middleware(
 )
 
 games = None
+gameName = None
 
 def get_steam_games():
     global games
@@ -53,12 +54,20 @@ async def get_games() -> dict:
 
 @app.get("/steamreview", tags=["review"])
 async def get_review() -> dict:
-    gameid = get_gameid(gameName)
-    print(gameid)
-    return {"data": get_game_review(gameid)}
+    if gameName is None:
+        return {"data": "the json is emptys"}
+        print("json is empty")
+    else:
+        gameid = get_gameid(gameName)
+        print(gameid)
+        return {"data": get_game_review(gameid)}
 
 @app.post("/gameinfo", tags=["postinfo"])
 async def post_data(game:dict) -> dict:
+    global gameName
+    print(game)
+    if "name" not in game or not game["name"] == None:
+        raise HTTPException(status_code=400, detail="Пустое или отсутствующее имя игры.")
     gameName = {}
     gameName.append(game)
     return {
