@@ -5,29 +5,40 @@ import Get_games from './Get_games';
 import {Get_review} from './Get_games.js';
 import './App.css';
 import Review from "./Review";
+import GameDropdown from "./GameDropdown";
 
 import { useEffect, useState } from "react";
 
 function App(){
+
+    const [chosenGame, setChosenGame] = useState("");
+
     useEffect(() => {
         document.title = "Random Steam Review Generator";
     })
 
-    return ( 
+    const selectGame=(title) => {
+        console.log("App select game: " + title)
+        setChosenGame(title);
+    }
+
+    return (
+        <>
     <Container>
         <Row>
           <Col> <h1>Random Steam Review generator</h1></Col>
         </Row>
         <Row>
-            <Col> <Review /></Col>
+            <Col> {chosenGame}</Col>
         </Row>
         <Row>
-          <Col className="gameInput"><Get_games /></Col>
+            <GameDropdown onSelect={selectGame}/>
         </Row>
         <Row>
-            <Get_review />
+            <Review gameTitle={chosenGame}/>
         </Row>
     </Container>
+        </>
 
 
 

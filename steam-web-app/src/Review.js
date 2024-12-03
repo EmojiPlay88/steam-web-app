@@ -1,8 +1,7 @@
-import review from "./Get_review.js";
-export default function Review(){
+export default function Review(props){
     return(
         <div>
-            <h3>{review}</h3>
+            <h3>{props.gameTitle}</h3>
         </div>
     );
 };

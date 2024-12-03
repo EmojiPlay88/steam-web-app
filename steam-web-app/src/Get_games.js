@@ -25,6 +25,10 @@ export default function Get_games(){
         fetchGames()
     }, [])
 
+    const handleInputChange = (event) => {
+        setInputValue(event.target.value);
+    };
+
     const filteredGames = () => {
         // Фильтруем игры по введенному тексту
         const matchedGames = games.filter((game) =>
@@ -59,6 +63,10 @@ export default function Get_games(){
     return(
         <GamesContext.Provider value={{games, fetchGames}}>
             <InputValueContxt.Provider value={{inputValue, setInputValue}}>
+                <Form.Control type="text"
+                placeholder="Enter Steam Game Name"
+                value={inputValue}
+                onChange={handleInputChange}/>
                 <Form.Select>
                     {filteredGames().map((game) => (
                         <option key={game.name} value={game.name}>
@@ -72,9 +80,10 @@ export default function Get_games(){
 }
 
 export function Get_review(){
-    const { inputValue } = useContext(InputValueContxt);
+    const { inputValue, setInputValue } = useContext(InputValueContxt);
     const [review, setReview] = useState({})
     const handleSubmit = async (event) => {
+        console.log(inputValue);
         await fetch("http://localhost:8000/gameinfo", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -83,13 +92,15 @@ export function Get_review(){
         const response = await fetch("http://localhost:8000/steamreview", {
             method:"GET"
         });
-        const reviewJson = await response.json;
+        const reviewJson = await response.json();
         setReview(reviewJson.data);
         return review;
     }
     return(
-        <ReviewContext.Provider value={{review, setReview}}>
-            <Button onClick={handleSubmit}>Get your random review</Button>
-        </ReviewContext.Provider>
+        <InputValueContxt.Provider value={{inputValue, setInputValue}}>
+            <ReviewContext.Provider value={{review, setReview}}>
+                <Button onClick={handleSubmit}>Get your random review</Button>
+            </ReviewContext.Provider>
+        </InputValueContxt.Provider>
     );
 }
