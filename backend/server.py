@@ -18,10 +18,12 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-global gameJson = {}
+games = None
 
 def get_steam_games():
-    games = requests.get(f"https://api.steampowered.com/ISteamApps/GetAppList/v0002/?format=json").json()
+    global games
+    if games is None:
+        games = requests.get(f"https://api.steampowered.com/ISteamApps/GetAppList/v0002/?format=json").json()
     return games["applist"]["apps"]
 
 def get_gameid(game:str):
@@ -51,12 +53,14 @@ async def get_games() -> dict:
 
 @app.get("/steamreview", tags=["review"])
 async def get_review() -> dict:
-    gameid = get_gameid("Counter Strike: Global Offensive")
-    return {"data": get_game_review()}
+    gameid = get_gameid(gameName)
+    print(gameid)
+    return {"data": get_game_review(gameid)}
 
 @app.post("/gameinfo", tags=["postinfo"])
 async def post_data(game:dict) -> dict:
-    gameJson.append(game)
-    return{
+    gameName = {}
+    gameName.append(game)
+    return {
         "data": "data successfully posted"
     }
