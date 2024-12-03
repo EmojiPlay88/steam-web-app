@@ -15,15 +15,11 @@ export default function GameDropdown(props) {
        fetchGames()
     }, [])
 
-
-
     const filteredGames = () => {
-        // Фильтруем игры по введенному тексту
         const matchedGames = games.filter((game) =>
             game.name.toLowerCase().includes(inputValue.toLowerCase())
         );
 
-        // Удаляем дубликаты в первых 25 элементах
         const uniqueGames = [];
         const seenNames = new Set();
 
@@ -33,11 +29,9 @@ export default function GameDropdown(props) {
                 seenNames.add(game.name.toLowerCase());
             }
 
-            // Как только собрали 25 уникальных игр — выходим из цикла
             if (uniqueGames.length === 100) break;
         }
 
-        // Если уникальных игр меньше 25, добавляем оставшиеся из исходного списка
         for (const game of games) {
             if (uniqueGames.length === 100) break;
             if (!seenNames.has(game.name.toLowerCase())) {
