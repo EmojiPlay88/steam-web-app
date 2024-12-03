@@ -1,17 +1,17 @@
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Get_games from './Get_games';
-import {Get_review} from './Get_games.js';
 import './App.css';
 import Review from "./Review";
 import GameDropdown from "./GameDropdown";
+import ReviewSubmit from "./ReiviewSubmit";
 
 import { useEffect, useState } from "react";
 
 function App(){
 
     const [chosenGame, setChosenGame] = useState("");
+    const [gameReview, setGameReview] = useState("");
 
     useEffect(() => {
         document.title = "Random Steam Review Generator";
@@ -22,6 +22,10 @@ function App(){
         setChosenGame(title);
     }
 
+    const displayReview = (review) => {
+        setGameReview(review);
+    }
+
     return (
         <>
     <Container>
@@ -29,13 +33,16 @@ function App(){
           <Col> <h1>Random Steam Review generator</h1></Col>
         </Row>
         <Row>
-            <Col> {chosenGame}</Col>
+            <Col><h3>{chosenGame}</h3></Col>
+        </Row>
+        <Row>
+            <Col><p>{gameReview}</p></Col>
         </Row>
         <Row>
             <GameDropdown onSelect={selectGame}/>
         </Row>
         <Row>
-            <Review gameTitle={chosenGame}/>
+            <ReviewSubmit onClick={displayReview} gameTitle={chosenGame}/>
         </Row>
     </Container>
         </>
