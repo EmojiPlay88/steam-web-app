@@ -2,11 +2,11 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Get_games from './Get_games';
-import Review from './Review';
+import {Get_review} from './Get_games.js';
 import './App.css';
+import Review from "./Review";
 
 import { useEffect, useState } from "react";
-import Get_review from './Get_review';
 
 function App(){
     useEffect(() => {
