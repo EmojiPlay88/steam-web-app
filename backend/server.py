@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
@@ -22,13 +22,15 @@ app.add_middleware(
 class Search(BaseModel):
     search: str
 
-class Review(BaseModel):
-    review: str
+class Game(BaseModel):
+    game: str
 
 games = None
-gameName = None
-searchInfo = None
-steamGame = None
+
+def no_whitespace(string:str):
+    if string.find(" ") > 0:
+        string = string.replace(" ", "")
+    return string
 
 def get_steam_games():
     global games
@@ -36,17 +38,9 @@ def get_steam_games():
         games = requests.get(f"https://api.steampowered.com/ISteamApps/GetAppList/v0002/?format=json").json()
     return games["applist"]["apps"]
 
-def get_gameid(game:str):
-    requested_game_id = None
-    games = requests.get(f"https://store.steampowered.com/api/storesearch/?term={game}&l=english&cc=us").json()
-    for steamgame in games["items"]:
-        if steamgame["name"].lower() == game.lower():
-            requested_game_id = steamgame["id"]
-    return requested_game_id
-
 def search_games(game:str):
-    if game.find(" ") > 0:
-        game = game.replace(" ", "")
+    game = no_whitespace(game)
+    print(f"Game is (searchgames): {game}")
     games = requests.get(f"https://store.steampowered.com/api/storesearch/?term={game}&l=english&cc=us").json()
     return games
 
@@ -69,24 +63,26 @@ async def get_games() -> dict:
     return {"data": get_steam_games()}
 
 @app.get("/steamreview", tags=["review"])
-async def get_review() -> dict:
-    if gameName is None:
+async def get_review(game_id: int = Query(..., alias="gameId")) -> dict:
+    print(game_id)
+    gameId = game_id
+    if gameId is None:
         return {"data": "the json is emptys"}
         print("json is empty")
     else:
-        gameid = get_gameid(gameName)
-        gameReview = get_game_review(gameid)
+        print(f"Game id: {gameId}")
+        gameReview = get_game_review(gameId)
         print(gameReview)
         return {"data": gameReview}
 
-@app.post("/gameinfo", tags=["postinfo"])
-async def post_data(game:dict) -> dict:
-    global gameName
-    if game["name"] is None:
+@app.post("/gameinfo")
+async def post_data(game: Game):
+    if game is None:
         raise HTTPException(status_code=400, detail="The name is empty")
-    gameName = game["name"]
+    game_name = game.game
     return {
-        "data": "data successfully posted"
+        "status": "1",
+        "game": game_name
     }
 
 @app.get("/steamgame", tags=["games"])
@@ -95,11 +91,11 @@ async def get_games() -> dict:
     return {"data": game_search}
 
 @app.post("/searchinfo", tags=["search"])
-async def search_inf(search: Search):
-    if search is None:
+async def search_inf(search: Search): #after 3 letters
+    if search.search is None:
         raise HTTPException(status_code=400, detail="The search is empty")
-    global searchInfo
-    searchInfo = search.search
+    game_search = search_games(search.search)
+    print(game_search)
     return {
-        "data": "search info successfully posted"
+        "data": game_search
     }
