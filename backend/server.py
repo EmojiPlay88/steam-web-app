@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import requests
 import random
 
@@ -18,8 +19,13 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+class Search(BaseModel):
+    search: str
+
 games = None
 gameName = None
+searchInfo = None
+steamGame = None
 
 def get_steam_games():
     global games
@@ -28,13 +34,18 @@ def get_steam_games():
     return games["applist"]["apps"]
 
 def get_gameid(game:str):
+    requested_game_id = None
     games = requests.get(f"https://store.steampowered.com/api/storesearch/?term={game}&l=english&cc=us").json()
     for steamgame in games["items"]:
         if steamgame["name"].lower() == game.lower():
             requested_game_id = steamgame["id"]
     return requested_game_id
 
-def get_game_info(id:int):
+def search_games(game:str):
+    games = requests.get(f"https://store.steampowered.com/api/storesearch/?term={game}&l=english&cc=us").json()
+    return games
+
+def get_game_info(id):
     requested_game_info = requests.get(f"http://store.steampowered.com/api/appdetails?appids={id}").json()
     return requested_game_info
 
@@ -60,16 +71,33 @@ async def get_review() -> dict:
     else:
         gameid = get_gameid(gameName)
         print(gameid)
-        return {"data": get_game_review(gameid)}
+        gameReview = get_game_review(gameid)
+        return {"data": gameReview}
 
 @app.post("/gameinfo", tags=["postinfo"])
 async def post_data(game:dict) -> dict:
     global gameName
     print(game)
-    if "name" not in game or not game["name"] == None:
-        raise HTTPException(status_code=400, detail="Пустое или отсутствующее имя игры.")
-    gameName = {}
-    gameName.append(game)
+    if game["name"] is None:
+        raise HTTPException(status_code=400, detail="The name is empty")
+    gameName = None
+    gameName = game["name"]
     return {
         "data": "data successfully posted"
+    }
+
+@app.get("/steamgame", tags=["games"])
+async def get_games() -> dict:
+    game_search = search_games(searchInfo)
+    return {"data": game_search}
+
+@app.post("/searchinfo", tags=["search"])
+async def search_inf(search: Search):
+    print(search)
+    if search is None:
+        raise HTTPException(status_code=400, detail="The search is empty")
+    global searchInfo
+    searchInfo = search.search
+    return {
+        "data": "search info successfully posted"
     }
