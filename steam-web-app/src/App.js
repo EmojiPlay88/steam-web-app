@@ -22,6 +22,7 @@ function App(){
     }
 
     const displayReview = (review) => {
+        console.log(review);
         setGameReview(review);
     }
 
@@ -32,7 +33,7 @@ function App(){
           <Col> <h1>Random Steam Review generator</h1></Col>
         </Row>
         <Row>
-            <Col><h3>{chosenGame}</h3></Col>
+            <Col><h3>{chosenGame.name}</h3></Col>
         </Row>
         <Row>
             <Col><Review review={gameReview}/></Col>
@@ -41,7 +42,7 @@ function App(){
             <GameDropdown onSelect={selectGame}/>
         </Row>
         <Row>
-            <ReviewSubmit onClick={displayReview} gameTitle={chosenGame}/>
+            <ReviewSubmit onClick={displayReview} game={chosenGame}/>
         </Row>
     </Container>
         </>
