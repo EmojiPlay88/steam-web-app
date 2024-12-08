@@ -18,7 +18,6 @@ function App(){
     })
 
     const selectGame=(title) => {
-        console.log("App select game: " + title)
         setChosenGame(title);
     }
 
@@ -36,7 +35,7 @@ function App(){
             <Col><h3>{chosenGame}</h3></Col>
         </Row>
         <Row>
-            <Col><p>{gameReview}</p></Col>
+            <Col><Review review={gameReview}/></Col>
         </Row>
         <Row>
             <GameDropdown onSelect={selectGame}/>

@@ -4,6 +4,7 @@ import React, {useState} from "react";
 export default function ReviewSubmit (props) {
     const [review, setReview] = useState("")
     const handleSubmit = async (event) => {
+        console.log(props.gameTitle);
         await fetch("http://localhost:8000/gameinfo", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
