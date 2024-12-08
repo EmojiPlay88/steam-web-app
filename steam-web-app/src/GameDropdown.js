@@ -12,19 +12,20 @@ export default function GameDropdown(props) {
         if(inputValue.length < 3){
             setGames([]);
         }else{
-            await axios.post(`http://localhost:8000/searchinfo`,
+            const search = await axios.post(`http://localhost:8000/searchinfo`,
                 JSON.stringify({"search": inputValue}), {
                 headers: {
                     "Content-Type": "application/json"
                 }
-            });
-            const search = await axios.get(`http://localhost:8000/steamgame`).catch(error => {
+            })
+            //const search = await axios.get(`http://localhost:8000/steamgame`).
+            .catch(error => {
                 console.error('Error fetching game info:', error);
             });
             setSearchInfo(search.data.data.items);
             const uniqueGames = [];
             for (const game of searchInfo) {
-                uniqueGames.push(game.name);
+                uniqueGames.push(game);
                 if (uniqueGames.length === 100) break;
             }
 
@@ -45,10 +46,11 @@ export default function GameDropdown(props) {
     }
 
     const onSelectHandler = (event) => {
-        const selectedValue = event.target.value;
-        console.log("Selected game:", selectedValue);
-        props.onSelect(selectedValue);
-
+        console.log(event.target.value);
+        console.log(games);
+        const game = games.find(game => game.id.toString() === event.target.value);
+        console.log("Selected game:", game);
+        props.onSelect(game);
     };
 
     return (
@@ -56,8 +58,8 @@ export default function GameDropdown(props) {
             <Form.Control onChange={onInputChange} value={inputValue} />
             <Form.Select onChange={onSelectHandler} >
                 {games.map((game) => (
-                    <option key={game} value={game}>
-                        {game}
+                    <option key={game.id} value={game.id}>
+                        {game.name}
                     </option>
                 ))}
             </Form.Select>
