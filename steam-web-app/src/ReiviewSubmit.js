@@ -1,20 +1,19 @@
 import Button from "react-bootstrap/Button";
 import React, {useState} from "react";
+import axios from "axios";
 
 export default function ReviewSubmit (props) {
     const [review, setReview] = useState("")
     const handleSubmit = async (event) => {
         console.log(props.gameTitle);
-        await fetch("http://localhost:8000/gameinfo", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({"name": props.gameTitle})
+        await axios.post("http://localhost:8000/gameinfo",
+            JSON.stringify({"name": props.gameTitle}),{
+            headers: {
+                "Content-Type": "application/json"
+            }
         });
-        const response = await fetch("http://localhost:8000/steamreview", {
-            method:"GET"
-        });
-        const reviewJson = await response.json();
-        setReview(reviewJson.data);
+        const response = await axios.get("http://localhost:8000/steamreview");
+        setReview(response.data.data);
         props.onClick(review);
     }
     return(
