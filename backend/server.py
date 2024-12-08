@@ -22,6 +22,9 @@ app.add_middleware(
 class Search(BaseModel):
     search: str
 
+class Review(BaseModel):
+    review: str
+
 games = None
 gameName = None
 searchInfo = None
@@ -42,6 +45,8 @@ def get_gameid(game:str):
     return requested_game_id
 
 def search_games(game:str):
+    if game.find(" ") > 0:
+        game = game.replace(" ", "")
     games = requests.get(f"https://store.steampowered.com/api/storesearch/?term={game}&l=english&cc=us").json()
     return games
 
@@ -70,17 +75,15 @@ async def get_review() -> dict:
         print("json is empty")
     else:
         gameid = get_gameid(gameName)
-        print(gameid)
         gameReview = get_game_review(gameid)
+        print(gameReview)
         return {"data": gameReview}
 
 @app.post("/gameinfo", tags=["postinfo"])
 async def post_data(game:dict) -> dict:
     global gameName
-    print(game)
     if game["name"] is None:
         raise HTTPException(status_code=400, detail="The name is empty")
-    gameName = None
     gameName = game["name"]
     return {
         "data": "data successfully posted"
@@ -93,7 +96,6 @@ async def get_games() -> dict:
 
 @app.post("/searchinfo", tags=["search"])
 async def search_inf(search: Search):
-    print(search)
     if search is None:
         raise HTTPException(status_code=400, detail="The search is empty")
     global searchInfo
