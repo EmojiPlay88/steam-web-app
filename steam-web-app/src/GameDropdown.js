@@ -8,52 +8,25 @@ export default function GameDropdown(props) {
     const [inputValue, setInputValue] = useState("");
     const [searchInfo, setSearchInfo] = useState("");
 
-    const setDefaultGames = async () => {
-        console.log('setDefaultGames')
-        axios.get(`http://localhost:8000/steamgames`)
-            .then(res => {
-                let gamesLoaded = res.data.data;
-                gamesLoaded = gamesLoaded.filter(game => game.name && game.name.trim() !== '');
-                console.log(gamesLoaded);
-                console.log("size: " +  gamesLoaded);
-                setGames( gamesLoaded );
-                console.log(gamesLoaded);
-
-            })
-            .catch(error => {
-                console.error('Error fetching default games:', error);
-                setGames([]);
-            });
-
-    }
-
     const fetchGames = async () => {
         if(inputValue.length < 3){
             setGames([]);
         }else{
-            console.log(inputValue);
             await axios.post(`http://localhost:8000/searchinfo`,
                 JSON.stringify({"search": inputValue}), {
                 headers: {
                     "Content-Type": "application/json"
                 }
             });
-            const search = await axios.get(`http://localhost:8000/steamgame`);
+            const search = await axios.get(`http://localhost:8000/steamgame`).catch(error => {
+                console.error('Error fetching game info:', error);
+            });
             setSearchInfo(search.data.data.items);
-            const matchedGames = searchInfo.filter((game) =>
-                game.name.toLowerCase().includes(inputValue.toLowerCase())
-            );
             const uniqueGames = [];
-            const seenNames = new Set();
-            for (const game of matchedGames) {
-                console.log(game.name);
-                if (!seenNames.has(game.name.toLowerCase())) {
-                    uniqueGames.push(game);
-                    seenNames.add(game.name.toLowerCase());
-                }
+            for (const game of searchInfo) {
+                uniqueGames.push(game.name);
                 if (uniqueGames.length === 100) break;
             }
-            console.log(uniqueGames);
 
             setGames(uniqueGames);
         }
@@ -82,9 +55,9 @@ export default function GameDropdown(props) {
         <div>
             <Form.Control onChange={onInputChange} value={inputValue} />
             <Form.Select onChange={onSelectHandler} >
-                {games.length > 0  && games.map((game) => (
-                    <option key={game.name} value={game.name}>
-                        {game.name}
+                {games.map((game) => (
+                    <option key={game} value={game}>
+                        {game}
                     </option>
                 ))}
             </Form.Select>
